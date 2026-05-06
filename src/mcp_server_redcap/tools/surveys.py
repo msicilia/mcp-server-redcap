@@ -16,6 +16,9 @@ def register(mcp: FastMCP) -> None:
     ) -> str:
         """Get a unique survey link for a participant to complete an instrument.
 
+        The instrument must be enabled as a survey in REDCap. Returns an error
+        if surveys are not enabled or the instrument is not a survey.
+
         Args:
             record: Record ID of the participant.
             instrument: Internal name of the survey instrument.
@@ -26,12 +29,15 @@ def register(mcp: FastMCP) -> None:
             The survey URL as a plain string.
         """
         project = get_project()
-        return project.export_survey_link(
-            record=record,
-            instrument=instrument,
-            event=event,
-            repeat_instance=repeat_instance,
-        )
+        try:
+            return project.export_survey_link(
+                record=record,
+                instrument=instrument,
+                event=event,
+                repeat_instance=repeat_instance,
+            )
+        except Exception as exc:
+            return f"Error retrieving survey link: {exc}"
 
     @mcp.tool()
     def export_survey_participant_list(
@@ -39,6 +45,9 @@ def register(mcp: FastMCP) -> None:
         event: str | None = None,
     ) -> str:
         """Export the list of survey participants for an instrument.
+
+        The instrument must be enabled as a survey in REDCap. Returns an error
+        if surveys are not enabled or the instrument is not a survey.
 
         Args:
             instrument: Internal name of the survey instrument.
@@ -48,9 +57,12 @@ def register(mcp: FastMCP) -> None:
             JSON array of participant records with email, name, and response status.
         """
         project = get_project()
-        result = project.export_survey_participant_list(
-            instrument=instrument,
-            format_type="json",
-            event=event,
-        )
-        return json.dumps(result, indent=2, default=str)
+        try:
+            result = project.export_survey_participant_list(
+                instrument=instrument,
+                format_type="json",
+                event=event,
+            )
+            return json.dumps(result, indent=2, default=str)
+        except Exception as exc:
+            return f"Error retrieving participant list: {exc}"

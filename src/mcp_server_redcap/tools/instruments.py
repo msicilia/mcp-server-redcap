@@ -119,7 +119,10 @@ def register(mcp: FastMCP) -> None:
             return f"Error: instrument '{form_name}' not found."
 
         count = project.import_metadata(to_import=to_keep, return_format_type="json")
-        return f"Successfully deleted instrument '{form_name}' and its {removed} field(s) ({count} field(s) updated)."
+        return (
+            f"Successfully deleted instrument '{form_name}' and its "
+            f"{removed} field(s) ({count} field(s) updated)."
+        )
 
     @mcp.tool()
     def rename_instrument(old_form_name: str, new_form_name: str) -> str:
@@ -149,8 +152,11 @@ def register(mcp: FastMCP) -> None:
                 field["form_name"] = new_form_name
                 updated += 1
 
-        count = project.import_metadata(to_import=dictionary, return_format_type="json")
-        return f"Successfully renamed instrument '{old_form_name}' → '{new_form_name}' ({updated} field(s) updated)."
+        project.import_metadata(to_import=dictionary, return_format_type="json")
+        return (
+            f"Successfully renamed instrument '{old_form_name}' → '{new_form_name}' "
+            f"({updated} field(s) updated)."
+        )
 
     @mcp.tool()
     def move_field(field_name: str, after_field: str | None = None) -> str:
@@ -169,7 +175,9 @@ def register(mcp: FastMCP) -> None:
         project = get_project()
         dictionary = project.export_metadata(format_type="json")
 
-        field_idx = next((i for i, f in enumerate(dictionary) if f["field_name"] == field_name), None)
+        field_idx = next(
+            (i for i, f in enumerate(dictionary) if f["field_name"] == field_name), None
+        )
         if field_idx is None:
             return f"Error: field '{field_name}' not found."
         if field_idx == 0:
@@ -186,7 +194,10 @@ def register(mcp: FastMCP) -> None:
         if after_field is None:
             form_name = field["form_name"]
             last_idx = next(
-                (i for i in range(len(dictionary) - 1, -1, -1) if dictionary[i]["form_name"] == form_name),
+                (
+                    i for i in range(len(dictionary) - 1, -1, -1)
+                    if dictionary[i]["form_name"] == form_name
+                ),
                 len(dictionary) - 1,
             )
             dictionary.insert(last_idx + 1, field)
@@ -195,7 +206,9 @@ def register(mcp: FastMCP) -> None:
             dictionary.insert(after_idx + 1, field)
 
         project.import_metadata(to_import=dictionary, return_format_type="json")
-        target = f"after '{after_field}'" if after_field else f"end of instrument '{field['form_name']}'"
+        target = (
+            f"after '{after_field}'" if after_field else f"end of instrument '{field['form_name']}'"
+        )
         return f"Successfully moved field '{field_name}' to {target}."
 
     @mcp.tool()
@@ -238,7 +251,12 @@ def register(mcp: FastMCP) -> None:
             if new_name in existing_names:
                 conflicts.append(new_name)
             else:
-                cloned = {**field, "field_name": new_name, "form_name": new_form_name, "branching_logic": ""}
+                cloned = {
+                    **field,
+                    "field_name": new_name,
+                    "form_name": new_form_name,
+                    "branching_logic": "",
+                }
                 new_fields.append(cloned)
 
         if conflicts:
@@ -252,8 +270,8 @@ def register(mcp: FastMCP) -> None:
         dictionary.extend(new_fields)
         count = project.import_metadata(to_import=dictionary, return_format_type="json")
         return (
-            f"Successfully cloned {len(new_fields)} field(s) from '{source_form}' into new instrument "
-            f"'{new_form_name}' ({count} field(s) updated). "
+            f"Successfully cloned {len(new_fields)} field(s) from '{source_form}' "
+            f"into new instrument '{new_form_name}' ({count} field(s) updated). "
             f"Branching logic was cleared on cloned fields — update with update_field if needed."
         )
 
@@ -283,7 +301,9 @@ def register(mcp: FastMCP) -> None:
 
         mappings.append({"arm_num": arm_num, "unique_event_name": event, "form": instrument})
         project.import_instrument_event_mappings(to_import=mappings, return_format_type="json")
-        return f"Successfully assigned instrument '{instrument}' to event '{event}' (arm {arm_num})."
+        return (
+            f"Successfully assigned instrument '{instrument}' to event '{event}' (arm {arm_num})."
+        )
 
     @mcp.tool()
     def unassign_instrument_from_event(instrument: str, event: str) -> str:
@@ -305,7 +325,10 @@ def register(mcp: FastMCP) -> None:
         except Exception as exc:
             return f"Error retrieving event mappings: {exc}"
 
-        updated = [m for m in mappings if not (m["form"] == instrument and m["unique_event_name"] == event)]
+        updated = [
+            m for m in mappings
+            if not (m["form"] == instrument and m["unique_event_name"] == event)
+        ]
         if len(updated) == len(mappings):
             return f"Error: instrument '{instrument}' is not assigned to event '{event}'."
 
@@ -381,14 +404,19 @@ def register(mcp: FastMCP) -> None:
         }
 
         if after_field:
-            idx = next((i for i, f in enumerate(dictionary) if f["field_name"] == after_field), None)
+            idx = next(
+                (i for i, f in enumerate(dictionary) if f["field_name"] == after_field), None
+            )
             if idx is None:
                 return f"Error: after_field '{after_field}' not found in the data dictionary."
             dictionary.insert(idx + 1, new_field)
         else:
             # Append after the last field belonging to this form.
             last_form_idx = next(
-                (i for i in range(len(dictionary) - 1, -1, -1) if dictionary[i]["form_name"] == form_name),
+                (
+                    i for i in range(len(dictionary) - 1, -1, -1)
+                    if dictionary[i]["form_name"] == form_name
+                ),
                 None,
             )
             if last_form_idx is None:
@@ -396,7 +424,10 @@ def register(mcp: FastMCP) -> None:
             dictionary.insert(last_form_idx + 1, new_field)
 
         count = project.import_metadata(to_import=dictionary, return_format_type="json")
-        return f"Successfully added field '{field_name}' to instrument '{form_name}' ({count} field(s) updated)."
+        return (
+            f"Successfully added field '{field_name}' to instrument '{form_name}' "
+            f"({count} field(s) updated)."
+        )
 
     @mcp.tool()
     def remove_field(field_name: str) -> str:

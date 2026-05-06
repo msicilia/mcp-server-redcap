@@ -54,7 +54,16 @@ Read tools (`get_metadata`, `export_records`, etc.) pass through PyCap with mini
 
 Tools that only apply to longitudinal projects (`assign_instrument_to_event`, `unassign_instrument_from_event`, `export_arms`, etc.) return a plain error string if called on a non-longitudinal project. They do not raise exceptions that would surface as MCP errors. This lets the agent recover and explain the situation to the user without crashing the tool call.
 
-### 8. Administrative operations are excluded
+### 8. REDCap version is surfaced, not gated
+
+REDCap does not use versioned API URLs. Features are gated by the version of the REDCap instance the token points to. Rather than building version-check logic into every tool, the server takes two simpler approaches:
+
+- `get_project_structure` includes the `redcap_version` field (from `project.redcap_version`) so the agent always knows what it is talking to.
+- Tools whose API endpoints may not exist on older instances (`export_pdf`, repeating instruments, arms, events, surveys) are wrapped in `try/except` and return a plain error string on failure rather than propagating an exception as an MCP error.
+
+The minimum recommended instance version is **REDCap 8.0**. Most tools work from 6.x; `export_pdf` requires 8.x; repeating instruments require 6.16+. PyCap itself handles the HTTP abstraction and is backward-compatible within its supported range.
+
+### 9. Administrative operations are excluded
 
 User management (`import_users`, `import_user_roles`, DAG assignment) is intentionally absent. An agent touching user permissions is a security concern disproportionate to the benefit, and these operations are low-frequency enough that a human doing them in the REDCap UI is the right answer. The full rationale is in the [What is excluded](#what-is-excluded) section.
 

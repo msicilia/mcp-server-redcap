@@ -70,31 +70,41 @@ def register(mcp: FastMCP) -> None:
             JSON array of log entries.
         """
         project = get_project()
-        result = project.export_logging(
-            format_type="json",
-            log_type=log_type,
-            user=user,
-            record=record,
-            begin_time=datetime.fromisoformat(begin_time) if begin_time else None,
-            end_time=datetime.fromisoformat(end_time) if end_time else None,
-        )
-        return json.dumps(result, indent=2, default=str)
+        try:
+            result = project.export_logging(
+                format_type="json",
+                log_type=log_type,
+                user=user,
+                record=record,
+                begin_time=datetime.fromisoformat(begin_time) if begin_time else None,
+                end_time=datetime.fromisoformat(end_time) if end_time else None,
+            )
+            return json.dumps(result, indent=2, default=str)
+        except Exception as exc:
+            return f"Error exporting log: {exc}"
 
     @mcp.tool()
     def export_repeating_instruments_events() -> str:
         """Export the repeating instruments and events configuration.
+
+        Requires REDCap 6.16 or later. Returns an error message on older instances.
 
         Returns:
             JSON array of repeating instrument/event definitions, or an empty array
             if the project has no repeating instruments or events.
         """
         project = get_project()
-        result = project.export_repeating_instruments_events(format_type="json")
-        return json.dumps(result, indent=2, default=str)
+        try:
+            result = project.export_repeating_instruments_events(format_type="json")
+            return json.dumps(result, indent=2, default=str)
+        except Exception as exc:
+            return f"Error: could not retrieve repeating instruments/events: {exc}"
 
     @mcp.tool()
     def import_repeating_instruments_events(data: str) -> str:
         """Import (create or update) repeating instruments and events configuration.
+
+        Requires REDCap 6.16 or later. Returns an error message on older instances.
 
         Args:
             data: JSON array of repeating instrument/event objects. Each object
@@ -104,9 +114,12 @@ def register(mcp: FastMCP) -> None:
             Confirmation message with the count of imported definitions.
         """
         project = get_project()
-        records_data = json.loads(data)
-        count = project.import_repeating_instruments_events(
-            to_import=records_data,
-            return_format_type="json",
-        )
-        return f"Successfully imported {count} repeating instrument/event definition(s)."
+        try:
+            records_data = json.loads(data)
+            count = project.import_repeating_instruments_events(
+                to_import=records_data,
+                return_format_type="json",
+            )
+            return f"Successfully imported {count} repeating instrument/event definition(s)."
+        except Exception as exc:
+            return f"Error: could not import repeating instruments/events: {exc}"

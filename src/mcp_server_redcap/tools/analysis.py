@@ -47,7 +47,10 @@ def register(mcp: FastMCP) -> None:
                 "instrument_label": instr["instrument_label"],
                 "field_count": len(fields_by_form.get(instr["instrument_name"], [])),
                 "field_types": dict(
-                    Counter(f["field_type"] for f in fields_by_form.get(instr["instrument_name"], []))
+                    Counter(
+                        f["field_type"]
+                        for f in fields_by_form.get(instr["instrument_name"], [])
+                    )
                 ),
             }
             for instr in instruments_list
@@ -55,6 +58,7 @@ def register(mcp: FastMCP) -> None:
 
         structure: dict = {
             "project_title": info.get("project_title"),
+            "redcap_version": str(project.redcap_version),
             "is_longitudinal": bool(info.get("is_longitudinal")),
             "surveys_enabled": bool(info.get("surveys_enabled")),
             "record_autonumbering_enabled": bool(info.get("record_autonumbering_enabled")),
@@ -132,10 +136,17 @@ def register(mcp: FastMCP) -> None:
                     })
 
         if not references:
-            return f"No references to '{field_name}' found in branching logic or calculations. Safe to remove or rename."
+            return (
+                f"No references to '{field_name}' found in branching logic or calculations. "
+                f"Safe to remove or rename."
+            )
 
         return json.dumps(
-            {"field_name": field_name, "reference_count": len(references), "references": references},
+            {
+                "field_name": field_name,
+                "reference_count": len(references),
+                "references": references,
+            },
             indent=2,
         )
 

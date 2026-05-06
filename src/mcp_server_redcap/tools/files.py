@@ -117,11 +117,14 @@ def register(mcp: FastMCP) -> None:
             JSON object with base64-encoded PDF content.
         """
         project = get_project()
-        content, _ = project.export_pdf(
-            record=record,
-            event=event,
-            instrument=instrument,
-            repeat_instance=repeat_instance,
-            compact_display=compact_display,
-        )
-        return json.dumps({"content_base64": base64.b64encode(content).decode("utf-8")})
+        try:
+            content, _ = project.export_pdf(
+                record=record,
+                event=event,
+                instrument=instrument,
+                repeat_instance=repeat_instance,
+                compact_display=compact_display,
+            )
+            return json.dumps({"content_base64": base64.b64encode(content).decode("utf-8")})
+        except Exception as exc:
+            return f"Error exporting PDF: {exc}"
