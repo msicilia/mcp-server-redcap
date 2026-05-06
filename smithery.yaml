@@ -1,0 +1,34 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      redcapUrl:
+        type: string
+        title: REDCap API URL
+        description: >
+          Full URL to your REDCap API endpoint,
+          e.g. https://redcap.example.org/api/
+      redcapToken:
+        type: string
+        title: REDCap API Token
+        description: Project-level API token from REDCap > API > Generate Token
+      redcapVerifySsl:
+        type: boolean
+        title: Verify SSL
+        description: >
+          Whether to verify SSL certificates. Set to false only for internal
+          instances with self-signed certificates.
+        default: true
+    required:
+      - redcapUrl
+      - redcapToken
+  commandFunction: |-
+    (config) => ({
+      command: "mcp-server-redcap",
+      env: {
+        REDCAP_URL: config.redcapUrl,
+        REDCAP_TOKEN: config.redcapToken,
+        REDCAP_VERIFY_SSL: String(config.redcapVerifySsl ?? true)
+      }
+    })
