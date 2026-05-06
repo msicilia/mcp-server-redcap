@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-redcap"
-version = "0.2.2"
+version = "0.3.0"
 description = "MCP server for REDCap (Research Electronic Data Capture)"
 readme = "README.md"
 license = { text = "MIT" }

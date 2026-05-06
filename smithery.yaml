@@ -25,7 +25,8 @@ startCommand:
       - redcapToken
   commandFunction: |-
     (config) => ({
-      command: "mcp-server-redcap",
+      command: "uvx",
+      args: ["mcp-server-redcap"],
       env: {
         REDCAP_URL: config.redcapUrl,
         REDCAP_TOKEN: config.redcapToken,
