@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 
-from .tools import arms_events, files, instruments, metadata, records, surveys
+from .tools import analysis, arms_events, files, instruments, metadata, records, surveys
 
 
 def create_server() -> FastMCP:
@@ -11,6 +11,7 @@ def create_server() -> FastMCP:
     files.register(mcp)
     arms_events.register(mcp)
     surveys.register(mcp)
+    analysis.register(mcp)
     return mcp
 
 
